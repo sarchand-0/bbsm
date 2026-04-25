@@ -138,7 +138,7 @@ export default function HomePage() {
 
       {/* Departments */}
       <section className="max-w-7xl mx-auto px-5 py-14">
-        <SectionHead label="Shop by Department" title="Browse Categories" href="/products" />
+        <SectionHead label="Shop by Department" title="Browse Categories" link="/products" />
         <div className="grid grid-cols-4 md:grid-cols-8 gap-3 mt-6">
           {DEPARTMENTS.map((d) => (
             <Link
@@ -160,7 +160,7 @@ export default function HomePage() {
       {(loading || promos.length > 0) && (
         <section className="bg-cream py-14">
           <div className="max-w-7xl mx-auto px-5">
-            <SectionHead label="Limited Time" title="Weekly Deals" href="/products?featured=true" />
+            <SectionHead label="Limited Time" title="Weekly Deals" link="/products?featured=true" />
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
               {loading
                 ? Array.from({ length: 3 }).map((_, i) => (
@@ -176,7 +176,7 @@ export default function HomePage() {
 
       {/* Featured products */}
       <section className="max-w-7xl mx-auto px-5 py-14">
-        <SectionHead label="Staff Picks" title="Featured Products" href="/products?is_featured=true" />
+        <SectionHead label="Staff Picks" title="Featured Products" link="/products?is_featured=true" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-6">
           {loading
             ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
@@ -187,7 +187,7 @@ export default function HomePage() {
       {/* New arrivals */}
       <section className="bg-cream py-14">
         <div className="max-w-7xl mx-auto px-5">
-          <SectionHead label="Just In" title="New Arrivals" href="/products?sort=newest" />
+          <SectionHead label="Just In" title="New Arrivals" link="/products?sort=newest" />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-5 mt-6">
             {loading
               ? Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
