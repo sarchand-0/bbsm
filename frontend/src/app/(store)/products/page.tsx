@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, X, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { ProductCard } from '@/components/store/ProductCard'
@@ -41,7 +41,7 @@ function FilterSection({ title, children }: { title: string; children: React.Rea
   )
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -456,5 +456,13 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense>
+      <ProductsContent />
+    </Suspense>
   )
 }

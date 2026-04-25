@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { ShieldOff } from 'lucide-react'
@@ -11,7 +12,7 @@ function homeFor(role?: string) {
   return '/'
 }
 
-export default function UnauthorizedPage() {
+function UnauthorizedContent() {
   const { user } = useAuthStore()
   const params   = useSearchParams()
   const from     = params.get('from') ?? ''
@@ -50,5 +51,13 @@ export default function UnauthorizedPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function UnauthorizedPage() {
+  return (
+    <Suspense>
+      <UnauthorizedContent />
+    </Suspense>
   )
 }

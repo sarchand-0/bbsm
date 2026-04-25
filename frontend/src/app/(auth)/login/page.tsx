@@ -1,14 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '@/components/ui'
 import { useAuthStore } from '@/lib/auth'
-import type { UserRole } from '@/types'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login } = useAuthStore()
@@ -31,7 +30,6 @@ export default function LoginPage() {
       } else if (user?.role === 'rider') {
         router.push('/rider')
       } else {
-        // Don't redirect a customer back to a CRM/rider URL
         const safeDest = from.startsWith('/crm') || from.startsWith('/rider') ? '/' : from
         router.push(safeDest)
       }
@@ -94,11 +92,18 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Demo credentials hint */}
       <div className="mt-8 p-4 bg-cream rounded-xl border border-primary/10">
         <p className="text-xs text-gray-400 font-medium mb-2">Demo credentials</p>
         <p className="text-xs text-gray-400">Admin: <span className="font-mono text-navy">admin@bbsm.np</span> / <span className="font-mono text-navy">admin123</span></p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
