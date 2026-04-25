@@ -39,6 +39,9 @@ yarn-error.log*
 # ─── Docker ───────────────────────────────────────────────────────────────────
 *.override.yml
 
+# ─── Vercel build (generated, not committed) ──────────────────────────────────
+frontend/api/backend-vendor/
+
 # ─── Uploads (dev) ────────────────────────────────────────────────────────────
 uploads/
 backend/uploads/

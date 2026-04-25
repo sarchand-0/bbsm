@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30,
+      "includeFiles": "api/backend-vendor/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "/api/index"
+    }
+  ]
+}
