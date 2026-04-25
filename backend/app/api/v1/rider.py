@@ -4,8 +4,6 @@ import string
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from pathlib import Path
-
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from pydantic import BaseModel
 from sqlalchemy import select, func as sqlfunc
@@ -14,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, require_role
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.storage import save_upload
 from app.core.notifications import create_notification
 from app.models.delivery import Delivery, OrderEvent, Rider
 from app.models.order import Order, OrderItem, OrderStatus
@@ -432,12 +431,8 @@ async def upload_rider_document(
     ext = (file.filename or "doc.jpg").rsplit(".", 1)[-1].lower()
     if ext not in {"jpg", "jpeg", "png", "webp", "pdf"}:
         ext = "jpg"
-    filename = f"{uuid.uuid4()}.{ext}"
-    dest = Path(settings.UPLOAD_DIR) / "rider-docs" / filename
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_bytes(await file.read())
-
-    url = f"/uploads/rider-docs/{filename}"
+    key = f"rider-docs/{uuid.uuid4()}.{ext}"
+    url = await save_upload(await file.read(), key, file.content_type or "application/octet-stream")
     docs = list(rider.documents or [])
     # Replace existing doc of same type
     docs = [d for d in docs if d.get("type") != doc_type]

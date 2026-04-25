@@ -74,8 +74,11 @@ app.include_router(rider_router.router, prefix="/api/v1")
 app.include_router(notifications_router.router, prefix="/api/v1")
 app.include_router(discounts_router.router, prefix="/api/v1")
 
-# Serve uploaded files
-app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+# Serve uploaded files only when using local storage (not S3)
+if not settings.USE_S3:
+    import os
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 
 @app.get("/health", tags=["system"])

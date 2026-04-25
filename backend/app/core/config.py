@@ -2,14 +2,15 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # PostgreSQL
+    # PostgreSQL — set DATABASE_URL directly (Railway/Render/RDS) OR individual parts (Docker Compose)
+    DATABASE_URL: str = ""
     POSTGRES_USER: str = "bbsm"
     POSTGRES_PASSWORD: str = "bbsmpassword"
     POSTGRES_DB: str = "bbsm_ecommerce"
     POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: int = 5432
 
-    # Redis
+    # Redis — supports rediss:// (Upstash TLS) and redis:// (local)
     REDIS_URL: str = "redis://redis:6379/0"
 
     # JWT
@@ -18,11 +19,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # CORS — stored as comma-separated string; use the property for a list
+    # CORS — comma-separated list of allowed origins
     BACKEND_CORS_ORIGINS: str = "http://localhost,http://localhost:3000"
 
-    # Uploads
+    # File storage — set USE_S3=true in production
+    USE_S3: bool = False
     UPLOAD_DIR: str = "/app/uploads"
+    AWS_ACCESS_KEY_ID: str = ""
+    AWS_SECRET_ACCESS_KEY: str = ""
+    AWS_S3_BUCKET: str = ""
+    AWS_S3_REGION: str = "ap-south-1"
 
     # Currency exchange rates (NPR)
     EXCHANGE_RATE_USD_NPR: float = 135.0
@@ -33,7 +39,15 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.BACKEND_CORS_ORIGINS.split(",")]
 
     @property
-    def DATABASE_URL(self) -> str:
+    def db_url(self) -> str:
+        if self.DATABASE_URL:
+            # Replace postgres:// with postgresql+asyncpg:// (Railway/RDS style)
+            url = self.DATABASE_URL
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif url.startswith("postgresql://") and "+asyncpg" not in url:
+                url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            return url
         return (
             f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
