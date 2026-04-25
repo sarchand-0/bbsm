@@ -41,12 +41,14 @@ class Settings(BaseSettings):
     @property
     def db_url(self) -> str:
         if self.DATABASE_URL:
-            # Replace postgres:// with postgresql+asyncpg:// (Railway/RDS style)
             url = self.DATABASE_URL
             if url.startswith("postgres://"):
                 url = url.replace("postgres://", "postgresql+asyncpg://", 1)
             elif url.startswith("postgresql://") and "+asyncpg" not in url:
                 url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            # Auto-add SSL for RDS endpoints
+            if "rds.amazonaws.com" in url and "ssl" not in url:
+                url += "?ssl=require"
             return url
         return (
             f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
