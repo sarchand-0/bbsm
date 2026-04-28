@@ -88,9 +88,9 @@ PRODUCTS = [
 ]
 
 PROMOTIONS = [
-    {"title": "Dashain Dhamaka Sale",  "sort_order": 1, "link_url": "/products?sale=dashain"},
-    {"title": "Fresh Produce Week",    "sort_order": 2, "link_url": "/categories/fresh-produce"},
-    {"title": "Buy 2 Get 1 Free Dairy","sort_order": 3, "link_url": "/categories/dairy"},
+    {"title": "Dashain Dhamaka Sale",   "sort_order": 1, "link_url": "/products?sale=dashain",         "image_url": "/promo-dashain.jpg"},
+    {"title": "Fresh Produce Week",     "sort_order": 2, "link_url": "/categories/fresh-produce",       "image_url": "/promo-fresh-produce.jpg"},
+    {"title": "Buy 2 Get 1 Free Dairy", "sort_order": 3, "link_url": "/categories/dairy",               "image_url": "/promo-dairy.jpg"},
 ]
 
 RIDERS = [
@@ -179,18 +179,22 @@ async def seed_promotions(db: AsyncSession) -> None:
     for pr in PROMOTIONS:
         existing = await db.scalar(select(Promotion).where(Promotion.title == pr["title"]))
         if existing:
+            # Refresh image_url on re-run so fixes propagate
+            existing.image_url = pr.get("image_url")
+            count += 1
             continue
         promo = Promotion(
             id=uuid.uuid4(),
             title=pr["title"],
             sort_order=pr["sort_order"],
             link_url=pr.get("link_url"),
+            image_url=pr.get("image_url"),
             active=True,
         )
         db.add(promo)
         count += 1
     await db.flush()
-    print(f"  ✓ {count} promotions seeded")
+    print(f"  ✓ {count} promotions seeded/updated")
 
 
 async def seed_riders(db: AsyncSession) -> None:
