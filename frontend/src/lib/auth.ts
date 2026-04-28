@@ -81,18 +81,46 @@ export const useAuthStore = create<AuthState>()(
       },
 
       async fetchMe() {
-        const { accessToken } = get()
+        const { accessToken, refreshToken } = get()
         if (!accessToken) return
-        const res = await fetch(`${API}/auth/me`, {
+
+        let res = await fetch(`${API}/auth/me`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         })
+
+        // On 401, try to refresh once before giving up
+        if (res.status === 401 && refreshToken) {
+          try {
+            const rr = await fetch(`${API}/auth/refresh`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refresh_token: refreshToken }),
+            })
+            if (rr.ok) {
+              const data = await rr.json()
+              get().setTokens(data.access_token, data.refresh_token)
+              res = await fetch(`${API}/auth/me`, {
+                headers: { Authorization: `Bearer ${data.access_token}` },
+              })
+            } else if (rr.status === 401 || rr.status === 403) {
+              // Refresh token genuinely invalid
+              get().clearAuth()
+              return
+            }
+            // On 5xx from refresh — keep session, don't clear auth
+          } catch {
+            return // network error — keep session
+          }
+        }
+
         if (res.ok) {
           const user = await res.json()
           set({ user })
           setCookie('bbsm_role', user.role, ROLE_COOKIE_TTL)
-        } else {
+        } else if (res.status === 401) {
           get().clearAuth()
         }
+        // On 5xx — keep session, don't clear auth
       },
     }),
     {

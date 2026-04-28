@@ -11,7 +11,8 @@ interface AdminOrder {
   id: string
   status: string
   total: number
-  customer: { full_name: string; email: string }
+  customer_name: string
+  customer_email: string
   item_count: number
   placed_at: string
 }
@@ -120,8 +121,8 @@ export default function CRMOrdersPage() {
                 <tr key={o.id} onClick={() => setSelected(o)} className="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer">
                   <td className="px-5 py-3 font-mono text-xs text-navy font-bold">#{o.id.slice(-8).toUpperCase()}</td>
                   <td className="px-5 py-3">
-                    <p className="text-sm font-medium text-navy">{o.customer?.full_name}</p>
-                    <p className="text-xs text-gray-400">{o.customer?.email}</p>
+                    <p className="text-sm font-medium text-navy">{o.customer_name}</p>
+                    <p className="text-xs text-gray-400">{o.customer_email}</p>
                   </td>
                   <td className="px-5 py-3 font-bold text-navy text-sm">{formatPrice(o.total)}</td>
                   <td className="px-5 py-3 text-sm text-gray-600">{o.item_count}</td>
@@ -144,8 +145,8 @@ export default function CRMOrdersPage() {
             <button onClick={() => setSelected(null)} className="text-gray-300 hover:text-gray-600">✕</button>
           </div>
           <p className="font-mono font-bold text-navy">#{selected.id.slice(-8).toUpperCase()}</p>
-          <p className="text-sm text-gray-500 mt-1">{selected.customer?.full_name}</p>
-          <p className="text-xs text-gray-400">{selected.customer?.email}</p>
+          <p className="text-sm text-gray-500 mt-1">{selected.customer_name}</p>
+          <p className="text-xs text-gray-400">{selected.customer_email}</p>
           <Badge variant={STATUS_VARIANTS[selected.status] ?? 'default'} className="mt-3">
             {selected.status}
           </Badge>

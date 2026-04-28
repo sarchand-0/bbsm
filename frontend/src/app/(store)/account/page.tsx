@@ -32,14 +32,17 @@ export default function AccountPage() {
   useEffect(() => {
     if (!user) { router.push('/login?from=/account'); return }
     setLoading(true)
+    setLoadError('')
     Promise.all([
-      api.get<OrderSummaryOut[]>('/orders').catch(() => []),
-      api.get<AddressOut[]>('/account/addresses').catch(() => []),
-      api.get<ProductOut[]>('/wishlist').catch(() => []),
+      api.get<OrderSummaryOut[]>('/orders'),
+      api.get<AddressOut[]>('/account/addresses').catch(() => [] as AddressOut[]),
+      api.get<ProductOut[]>('/wishlist').catch(() => [] as ProductOut[]),
     ]).then(([o, a, w]) => {
       setOrders(o)
       setAddresses(a)
       setWishlist(w)
+    }).catch((err) => {
+      setLoadError(err?.message ?? 'Failed to load your account data. Please try again.')
     }).finally(() => setLoading(false))
   }, [user])
 

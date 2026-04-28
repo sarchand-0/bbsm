@@ -70,7 +70,7 @@ async def login(body: LoginIn, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=TokenOut)
-async def refresh(body: RefreshIn, db: AsyncSession = Depends(get_db), redis=Depends(get_redis)):
+async def refresh(body: RefreshIn, db: AsyncSession = Depends(get_db)):
     exc = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
     try:
         payload = decode_token(body.refresh_token)
@@ -79,18 +79,28 @@ async def refresh(body: RefreshIn, db: AsyncSession = Depends(get_db), redis=Dep
     except JWTError:
         raise exc
 
-    # Check blocklist
-    if await redis.exists(_blocklist_key(body.refresh_token)):
-        raise exc
+    # Check blocklist — best-effort, skip if Redis unavailable
+    try:
+        redis = await get_redis()
+        if await redis.exists(_blocklist_key(body.refresh_token)):
+            raise exc
+    except HTTPException:
+        raise
+    except Exception:
+        pass  # Redis down — skip blocklist check
 
     user = await db.get(User, payload["sub"])
     if not user or user.status == UserStatus.suspended:
         raise exc
 
-    # Blocklist the old refresh token, issue a fresh pair
-    ttl = token_ttl_seconds(payload)
-    if ttl > 0:
-        await redis.setex(_blocklist_key(body.refresh_token), ttl, "1")
+    # Blocklist the old token — best-effort, skip if Redis unavailable
+    try:
+        redis = await get_redis()
+        ttl = token_ttl_seconds(payload)
+        if ttl > 0:
+            await redis.setex(_blocklist_key(body.refresh_token), ttl, "1")
+    except Exception:
+        pass
 
     return _make_token_response(user)
 
