@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     # File storage — set USE_S3=true in production
     USE_S3: bool = False
-    UPLOAD_DIR: str = "/app/uploads"
+    UPLOAD_DIR: str = "/tmp/uploads"
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""
     AWS_S3_BUCKET: str = ""
