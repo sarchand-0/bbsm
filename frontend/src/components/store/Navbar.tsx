@@ -102,13 +102,8 @@ export function Navbar() {
       )}>
         <div className="max-w-7xl mx-auto px-5 h-16 flex items-center gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 group" onClick={() => setMenuOpen(false)}>
-            <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white">
-              <Image src="/logo-icon.jpg" alt="BBSM" width={40} height={40} className="object-contain" />
-            </div>
-            <div className="leading-none hidden sm:block">
-              <Image src="/logo.png" alt="Bhat-Bhateni Super Store" width={120} height={32} className="object-contain h-8 w-auto" />
-            </div>
+          <Link href="/" className="flex items-center shrink-0" onClick={() => setMenuOpen(false)}>
+            <Image src="/logo.png" alt="Bhat-Bhateni Super Store" width={140} height={40} className="object-contain h-10 w-auto" />
           </Link>
 
           {/* Desktop nav */}
