@@ -129,6 +129,12 @@ export interface AddressOut {
   is_default: boolean
 }
 
+export interface WishlistItemOut {
+  product_id: string
+  product: ProductOut
+  created_at: string
+}
+
 // ─── Delivery tracking ──────────────────────────────────────────────────────
 
 export interface OrderEvent {
