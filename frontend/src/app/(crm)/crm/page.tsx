@@ -30,7 +30,9 @@ interface LowStockItem {
   id: string; name: string; slug: string; stock_qty: number; sku: string | null
 }
 
-const STATUS_COLOR: Record<string, string> = {
+type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'ghost'
+
+const STATUS_COLOR: Record<string, BadgeVariant> = {
   pending: 'warning', confirmed: 'info', packed: 'warning',
   shipped: 'info', delivered: 'success', cancelled: 'danger',
 }
