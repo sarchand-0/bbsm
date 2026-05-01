@@ -69,7 +69,7 @@ class OrderSummaryOut(BaseModel):
     id: uuid.UUID
     status: OrderStatus
     total: float
-    item_count: int
+    item_count: int = 0
     placed_at: datetime
 
     model_config = {"from_attributes": True}
