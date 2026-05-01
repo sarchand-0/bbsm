@@ -6,10 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_role
 from app.core.database import get_db
-from app.models.order import Order, OrderStatus
-from app.models.product import Product
+from app.models.order import Order, OrderItem, OrderStatus
+from app.models.product import Product, ProductStatus
 from app.models.user import User, UserRole, UserStatus
-from app.schemas.admin import DashboardStatsOut, RevenueDataPoint
+from app.schemas.admin import AdminOrderSummaryOut, DashboardStatsOut, RevenueDataPoint
 
 router = APIRouter(prefix="/admin/dashboard", tags=["admin"])
 
@@ -91,4 +91,52 @@ async def get_revenue_chart(
     return [
         RevenueDataPoint(date=str(row.day), revenue=float(row.revenue), orders=row.orders)
         for row in rows
+    ]
+
+
+@router.get("/recent-orders", response_model=list[AdminOrderSummaryOut])
+async def get_recent_orders(
+    limit: int = Query(default=8, ge=1, le=20),
+    _user=Depends(_staff_or_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    rows = await db.execute(
+        select(Order).order_by(Order.placed_at.desc()).limit(limit)
+    )
+    orders = list(rows.scalars())
+    result = []
+    for o in orders:
+        customer = await db.get(User, o.user_id)
+        item_count = await db.scalar(
+            select(func.count(OrderItem.id)).where(OrderItem.order_id == o.id)
+        ) or 0
+        result.append(AdminOrderSummaryOut(
+            id=o.id,
+            status=o.status,
+            total=float(o.total),
+            item_count=item_count,
+            placed_at=o.placed_at,
+            customer_name=customer.full_name if customer else "Unknown",
+            customer_email=customer.email if customer else "",
+        ))
+    return result
+
+
+@router.get("/low-stock", response_model=list[dict])
+async def get_low_stock(
+    threshold: int = Query(default=10, ge=0),
+    limit: int = Query(default=8, ge=1, le=20),
+    _user=Depends(_staff_or_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    rows = await db.execute(
+        select(Product)
+        .where(Product.stock_qty <= threshold, Product.status != ProductStatus.archived)
+        .order_by(Product.stock_qty.asc())
+        .limit(limit)
+    )
+    products = list(rows.scalars())
+    return [
+        {"id": str(p.id), "name": p.name, "slug": p.slug, "stock_qty": p.stock_qty, "sku": p.sku}
+        for p in products
     ]
